@@ -1,0 +1,11 @@
+name: instagramanalysis
+title: InstagramAnalysis
+account: shining-thiloshon
+server: shinyapps.io
+appId: 178264
+bundleId: 816702
+url: https://shining-thiloshon.shinyapps.io/instagramanalysis/
+when: 1494005605.90902
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: data.csv

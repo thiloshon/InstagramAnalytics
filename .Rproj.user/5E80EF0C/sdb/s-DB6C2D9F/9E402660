@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "#\n# This is the server logic of a Shiny web application. You can run the\n# application by clicking 'Run App' above.\n#\n# Find out more about building applications with Shiny here:\n#\n#    http://shiny.rstudio.com/\n#\n\nlibrary(shiny)\nlibrary(ggplot2)\nlibrary(scales)\n\n# Define server logic required to draw a histogram\nshinyServer(function(input, output) {\n    output$distPlot <- renderPlot({\n        insta.data.raw<- read.csv(\"dataNew.csv\")\n        insta.data.raw<-insta.data.raw[,2:15]\n        insta.data.raw$dateNew <- as.Date(insta.data.raw$createdTime)\n        print(insta.data.raw$dateNew)\n        dataNew <-\n            insta.data.raw[insta.data.raw$userName %in% input$users, ]\n        \n        ggplot(data = dataNew,\n               aes(y = dataNew$likes, x = dataNew$dateNew)) +\n            scale_x_date(\n                date_breaks = \"06 month\",\n                labels = date_format(\"%b-%Y\"),\n                limits = (input$bins)\n            ) +\n            geom_smooth() + xlab(\"Date\") +\n            ylab(\"Likes\") + labs(title = \"Likes over the Time\", colour = \"Users\") +\n            geom_point(aes(color = dataNew$userName))\n        })\n    \n    #print(input$users)\n    \n    \n    output$filterPlot <- renderPlot({\n        insta.data.raw<- read.csv(\"dataNew.csv\")\n        dataNew <- insta.data.raw[insta.data.raw$userName %in% input$users, ]\n        ggplot(data = dataNew,\n               aes(\n                   y = dataNew$likes,\n                   x = dataNew$filter,\n                   color = dataNew$userName\n               )) + \n            geom_point() + \n            theme(axis.text.x = element_text(angle = 45, hjust = 1)) +\n            labs(x = \"Filters\", y = \"Likes\", color = \"Users\", title = \"Users and Filters Used\")\n    })\n    \n    \n    output$data <- renderTable({\n        insta.data.raw<- read.csv(\"dataNew.csv\")\n        insta.data.raw[insta.data.raw$userName %in% input$users, , drop = FALSE]\n    }, rownames = TRUE)\n    \n})\n",
+    "created" : 1493984326213.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2799841825",
+    "id" : "9E402660",
+    "lastKnownWriteTime" : 1494004584,
+    "last_content_update" : 1494004584641,
+    "path" : "~/RProjects/Instagram Analytics/InstaAnalysis/server.R",
+    "project_path" : "InstaAnalysis/server.R",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

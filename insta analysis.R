@@ -16,6 +16,7 @@ appAuth <-
                scope = c("public_content", "follower_list", "basic"))
 accessToken <- appAuth$credentials$access_token
 save(accessToken, file = "auth")
+load("auth")
 
 save(insta.data.raw, file = "Data")
 write.csv(insta.data.raw, file = "data.csv")
@@ -75,7 +76,7 @@ thanu <- "2000582268"
 usersData <-
     paste(
         "https://api.instagram.com/v1/users/",
-        thanu,
+        shimak,
         "/?access_token=",
         accessToken,
         sep = ""
@@ -155,15 +156,37 @@ insta.data.raw$weekdays <- weekdays(insta.data.raw$createdTime)
 
 insta.data.raw$usersAbove0 <- insta.data.raw$usersInPhoto > 0
 
+load("InstaAnalysis/data.csv")
+insta.data.raw<- read.csv("InstaAnalysis/data.csv")
+
 # Plotting
-qplot(y = insta.data.raw$likes,
-      x = insta.data.raw$weekdays,
-      color = insta.data.raw$userName)
+qplot(y = instagramData$likes,
+      x = instagramData$weekdays,
+      color = instagramData$userName) + labs(title = "Likes vs Weekdays", x = "Weekdays", y = "Likes", colour = "Users") 
 
 qplot(
     y = insta.data.raw$likes,
     x = anydate(insta.data.raw$createdTime),
-    color = insta.data.raw$emptyLocation
+    color = insta.data.raw$usersAbove0
+) + labs(title = "Likes vs Friends Tagged", x = "Time", y = "Likes", colour = "Is anyone tagged in the image?") 
+
+qplot(
+    y = instagramData$likes,
+    x = anydate(instagramData$createdTime),
+    color = (instagramData$followers > 200)
+) + labs(title = "Likes vs Followers Count", x = "Time", y = "Likes", colour = "Is Followers > 200") 
+
+qplot(
+    y = instagramData$likes,
+    x = anydate(instagramData$createdTime),
+    color = as.factor(instagramData$followers)
+) + labs(title = "Likes vs Followers Variation", x = "Time", y = "Likes", colour = "No of Followers") + geom_smooth(se=F, size = 0.8)
+
+qplot(
+    y = insta.data.raw$likes,
+    x = anydate(insta.data.raw$createdTime),
+    color = insta.data.raw$userName,
+    
 )
 
 qplot(
@@ -181,7 +204,22 @@ qplot(
 qplot(y = insta.data.raw$likes,
       x = insta.data.raw$userName,
       color = insta.data.raw$userName, geom = "boxplot", 
-      fill = insta.data.raw$userName)
+      fill = insta.data.raw$userName) + labs(title = "Likes vs Users", x = "Users", y = "Likes", colour = "Users")
+
+ggplot(data = insta.data.raw) + geom_boxplot(
+    aes(
+        y = insta.data.raw$likes,
+        x = insta.data.raw$userName,
+        fill = insta.data.raw$userName,
+        colour = insta.data.raw$userName
+    )
+) + labs(
+    title = "Likes vs Users",
+    x = "Users",
+    y = "Likes",
+    fill = "Users",
+    colour = "Users"
+)
 
 
 
@@ -190,7 +228,7 @@ qplot(y = insta.data.raw$likes,
 fit <- lm(insta.data.raw$likes ~ ., data = insta.data.raw)
 fit
 
-fit2 <- lm(likes ~ createdTime + commentsCount + usersInPhoto + weekdays, data = insta.data.raw)
+fit2 <- lm(likes ~ as.Date(insta.data.raw$dateNew) + commentsCount + usersInPhoto + weekdays, data = insta.data.raw)
 fit2
     
 qplot(y = insta.data.raw$likes, x = insta.data.raw$createdTime) +
@@ -214,8 +252,11 @@ qplot(y = insta.data.raw$likes, x = insta.data.raw$commentsCount) + geom_smooth(
 cor(insta.data.raw[,c(5,8,11)])
 
 library()
+write.csv(cleanedInstaData, "cleanedData.csv")
 
-
+train <- createDataPartition(cleanedInstaData$likes, p=0.75, list = F) 
+data.train <- cleanedInstaData[train,]
+data.test <- cleanedInstaData[-train,]
 
 
 
